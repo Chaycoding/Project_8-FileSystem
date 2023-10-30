@@ -1,107 +1,60 @@
 import React, { useState } from "react";
-import Progressbar from "./progressBar";
 import PageSwitchAni from "./transitionAnimation/pageAni";
-import useRetrieveUrl from "./hooks/useRetrieveUrl";
-import { useEffect } from "react";
+import { ref, getStorage, uploadBytesResumable } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
 
-function Uploadcontent({ user }) {
-  const [name, setName] = useState();
-  const [email, setEmail] = useState();
-  const [title, setTitle] = useState(null);
+function Uploadcontent() {
   const [content, setContent] = useState(null);
   const [files, setFiles] = useState(null);
-  const [imgurl, setimgurl] = useState({ mainImg: null, thumbnailImg: null });
-  const [imageUrl, setImageUrl] = useState();
-
-  const MainimgUrl = useRetrieveUrl(imgurl.mainImg);
-  const ThumbimgUrl = useRetrieveUrl(imgurl.thumbnailImg);
-  useEffect(() => {
-    if (ThumbimgUrl && MainimgUrl) {
-      setImageUrl({ MainimgUrl, ThumbimgUrl });
-    }
-  }, [MainimgUrl, ThumbimgUrl]);
+  const [taskState, settaskState] = useState(false);
+  const [uploadProgress, setuploadProgress] = useState(0);
 
   const navigate = useNavigate();
+  console.log(content, "no"); //testing the firebase storage
 
   const submit = (e) => {
     e.preventDefault();
-    if (content != null || title != null) {
-      fetch("http://localhost:5000/api/v1/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name || user.displayName,
-          content: content,
-          image: imageUrl.MainimgUrl,
-          thumbnailImg: imageUrl.ThumbimgUrl,
-          email: email || user.email,
-          title: title,
-        }),
-      })
-        .then((res) => res.json())
-        .then((json) =>
-          fetch("http://localhost:5000/api/v1/blogOverview", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: name || user.displayName,
-              thumbnailImg: imageUrl.ThumbimgUrl,
-              title: title,
-              id: json["ID"],
-            }),
-          })
-        )
-        .catch((error) => console.log(error));
-
-      navigate("/");
-    }
+    navigate("/");
   };
+
   const updateItem = (e) => {
-    let selected = e.target.files[0];
+    let selected = e.target.files;
+
     if (selected && files != selected) {
       setFiles(selected);
+
+      const storage = getStorage();
+
+      for (let i = 0; i < selected.length; i++) {
+        if (selected[i] != "length") {
+          let file = selected[i];
+
+          let storageName = ref(storage, `FileStorage/${file.name}`);
+
+          let taskStat = uploadBytesResumable(storageName, file);
+          settaskState(taskStat);
+          taskStat.on("state_changed", (snapshot) => {
+            setuploadProgress(
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+            );
+          });
+        }
+      }
     }
   };
+  let colorCheck = uploadProgress == 100 ? "green" : "";
+  let style = { width: `${uploadProgress}%`, backgroundColor: colorCheck };
 
   return (
     <div className="pb-[50rem] mt-20">
       <PageSwitchAni />
-      <h1 className="text-center text-6xl pb-28">Make your own blog</h1>
+
       <form
         method="POST"
         id="form"
         onSubmit={(e) => submit(e)}
         className="text-2xl px-36 grid gap-y-10 grid-cols-2"
       >
-        <p className="col-span-2 text-[2.7rem] ">Author details</p>
-        <hr />
-        <span />
-        <label htmlFor="name">What's your name?</label>
-        <input
-          className="border border-[#237477]  rounded-3xl pl-5"
-          type="text"
-          name="name"
-          onChange={(e) => setName(e.target.value)}
-        />
-        <label htmlFor="name">What's your email?</label>
-        <input
-          className="border border-[#237477]  rounded-3xl pl-5"
-          type="text"
-          name="name"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <p className="col-span-2 text-[2.7rem] mt-10">Blog</p>
-        <hr />
-        <span />
-        <label htmlFor="name">What's your blog title?</label>
-        <input
-          className="border border-[#237477]  rounded-3xl pl-5"
-          type="text"
-          name="name"
-          onChange={(e) => setTitle(e.target.value)}
-        />
-
         <label htmlFor="content">What's your story?</label>
         <textarea
           className="border col-span-2 h-80 border-[#237477] rounded-3xl pl-5 pt-5"
@@ -109,30 +62,31 @@ function Uploadcontent({ user }) {
           name="content"
           onChange={(e) => setContent(e.target.value)}
         />
-        <p>
-          You can upload an image if you'd like.
-          <br />
-          It should be horizontally wide.
-        </p>
+
         <label className="hover:cursor-pointer flex justify-center items-center hover:bg-black hover:text-white transition-all duration-[300ms] border border-[#237477] rounded-3xl text-3xl pb-2">
           Upload file
-          <input type="file" name="content" onChange={updateItem} />
-        </label>
-        {files && <div>{files.name}</div>}
-        {files && (
-          <Progressbar
-            file={files}
-            setimgurl={setimgurl}
-            imageUrl={imageUrl}
-            userName={user.displayName}
+          <input
+            type="file"
+            multiple="multiple"
+            name="content"
+            onChange={updateItem}
           />
+        </label>
+        {taskState == false ? (
+          ""
+        ) : (
+          <div className="w-full rounded-full h-2.5 dark:bg-gray-700 col-span-2">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                taskState.cancel();
+              }}
+            >
+              Cancel upload
+            </button>
+            <div className="bg-blue-600 h-2.5 rounded-full" style={style}></div>
+          </div>
         )}
-        {imageUrl && (
-          <h1>
-            Everything's ready {imageUrl.MainimgUrl + imageUrl.ThumbimgUrl}
-          </h1>
-        )}
-
         <button className="hover:bg-black hover:text-white text-4xl col-span-2 border border-white hover:border-transparent transition-all duration-[300ms] rounded-r-3xl rounded-l-3xl py-2 px-4 pb-[12px]">
           Submit
         </button>

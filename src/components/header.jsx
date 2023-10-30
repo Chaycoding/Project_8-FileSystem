@@ -1,19 +1,21 @@
 import { Link } from "react-router-dom";
 import { useScrollPosition } from "./hooks/useScrollPosition";
+import { RiBearSmileFill } from "react-icons/ri";
 
 function Header({ isAuth, button, user }) {
   const scrollPosition = useScrollPosition();
   const scrollColour = scrollPosition > 0 ? "anicol" : "aniRevcol ";
-  const scrollPos = scrollPosition > 0 ? "" : "translate-x-[33rem]";
   const scrollHeader = `sticky top-0 z-10 duration-[1s] transition-all ${scrollColour}`;
-  const scrollTitle = `ml-20 text-[30px] drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)] mb-5 transition-all duration-[1s] font-semibold ${scrollPos}`;
 
   return (
     <div className={scrollHeader}>
       <div className="w-full h-20 hidden items-end sm:flex ">
         <div className="font-[Open Sans] text-white basis-5/6">
           <Link to="/">
-            <button className={scrollTitle}>Chaylogs</button>
+            <button className="ml-10 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)] mb-5 font-semibold ">
+              <RiBearSmileFill className="drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)] inline-block text-4xl -mt-3" />
+              <span className="text-3xl ml-2 ">Chaytuff</span>
+            </button>
           </Link>
         </div>
         <div className="font-[Open Sans] text-white basis-1/6">
@@ -25,9 +27,11 @@ function Header({ isAuth, button, user }) {
                 referrerPolicy="no-referrer"
                 className="rounded-full h-10 mt-3 mr-3 w-10 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]"
               />
-              <h1 className="text-[25px] mt-3 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)] pr-5">
-                {user.displayName}
-              </h1>
+              <Link to="/userProfile">
+                <button className="text-[25px] mt-3 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)] pr-5">
+                  {user.displayName}
+                </button>
+              </Link>
               <button
                 className="text-[25px] mt-3 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)] hover:outline rounded-lg p-2 mr-5 transition-all font-semibold"
                 onClick={button}
@@ -37,9 +41,6 @@ function Header({ isAuth, button, user }) {
             </div>
           ) : (
             <div>
-              <button className="text-[25px] drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)] p-2 hover:outline rounded-lg mb-4 transition-all font-semibold">
-                Join
-              </button>
               <Link to="/login">
                 <button className="text-[25px] drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)] ml-10 hover:outline rounded-lg p-2 transition-all font-semibold">
                   Sign in
@@ -48,6 +49,19 @@ function Header({ isAuth, button, user }) {
             </div>
           )}
         </div>
+      </div>
+      <div className="sm:hidden text-white text-center -ml-8 pt-2">
+        <Link to="/">
+          <button className="ml-10 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)] mb-5 font-semibold ">
+            <RiBearSmileFill className="drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)] inline-block text-4xl -mt-3" />
+            <span className="text-2xl ml-2 ">Chaytuff</span>
+          </button>
+        </Link>
+        <Link to="/login">
+          <button className="text-[22px] drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)] ml-10 hover:outline rounded-lg p-2 transition-all font-semibold">
+            Sign in
+          </button>
+        </Link>
       </div>
     </div>
   );

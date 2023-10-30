@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
+import { getDatabase } from "firebase/database";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -12,6 +13,8 @@ const app = initializeApp({
   storageBucket: "blog-c9556.appspot.com",
   messagingSenderId: "840928673591",
   appId: "1:840928673591:web:47ecd3cd16780b8f85e4b2",
+
+  databaseURL: "https://blog-c9556-default-rtdb.firebaseio.com/",
 });
 
 // Initialize Firebase
@@ -19,5 +22,6 @@ const app = initializeApp({
 const projectStorage = getStorage(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+const database = getDatabase(app);
 
-export { projectStorage, auth, provider };
+export { projectStorage, auth, provider, database };
