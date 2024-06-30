@@ -14,7 +14,7 @@ function Header({ isAuth, button, user }) {
           <Link to="/">
             <button className="ml-10 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)] mb-5 font-semibold ">
               <RiBearSmileFill className="drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)] inline-block text-4xl -mt-3" />
-              <span className="text-3xl ml-2 ">Chaytuff</span>
+              <span className="text-3xl ml-2 ">Chaytuff files</span>
             </button>
           </Link>
         </div>
